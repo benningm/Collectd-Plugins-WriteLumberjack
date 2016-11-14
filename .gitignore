@@ -1,0 +1,5 @@
+.build
+Collectd-Plugins-WriteLumberjack-*
+.*.swp
+local
+cpanfile.snapshot

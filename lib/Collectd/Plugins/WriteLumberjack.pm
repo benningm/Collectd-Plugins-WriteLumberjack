@@ -5,8 +5,9 @@ use warnings;
 use Collectd qw( :all );
 use threads::shared;
 
-use Net::Lumberjack;
+use Net::Lumberjack::Client;
 use Sys::Hostname;
+use Time::Piece;
 
 # ABSTRACT: sends collectd metrics to a lumberjack/beats server
 # VERSION
@@ -46,13 +47,13 @@ In your collectd config:
 =cut
 
 my $config = {
-  host => '127.0.0.1';
-  port => 5044;
-  keepalive => 0;
-  frame_format => 'json';
-  max_window_size => 2048;
-  use_ssl => 0;
-  ssl_verify => 1;
+  host => '127.0.0.1',
+  port => 5044,
+  keepalive => 0,
+  frame_format => 'json',
+  max_window_size => 2048,
+  use_ssl => 0,
+  ssl_verify => 1,
 };
 
 my @supported_options = (
@@ -94,9 +95,10 @@ sub write_lumberjack_write {
     if ( defined $vl->{'type_instance'} ) {
         $type_str .= "-" . $vl->{'type_instance'};
     }
+    my $time = Time::Piece->new( $vl->{'time'} );
 
     my $log = {
-      '@timestamp' => $vl->{'time'},
+      '@timestamp' => $time->datetime,
       'type' => 'collectd',
       'collectd_plugin' => $plugin_str,
       'collectd_type' => $type_str,
